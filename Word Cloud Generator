@@ -33,7 +33,7 @@ wc.generate(f)
 
 
 # Store to file name of your choosing
-wc.to_file(path.join(d, "hc1.png"))
+wc.to_file(path.join(d, "hc_wc.png"))
 
 # show
 plt.imshow(wc)
