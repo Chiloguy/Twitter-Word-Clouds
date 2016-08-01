@@ -1,0 +1,46 @@
+# You might not need all of these imports but I'm too lazy to delete them right now.
+from wordcloud import WordCloud, STOPWORDS
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+from PIL import Image
+import numpy as np
+from scipy.misc import imread
+from os import path
+from wordcloud import WordCloud
+
+
+d = path.dirname('__file__')
+
+# Read in the entire text (in this case, our list of tweets)
+text = open('hc_tweets.txt', "r")
+f = text.read()
+
+# The mask is the image stencil that will be used in the word cloud. 
+# If you want a generic word cloud with no specific shape, you can choose to not use a mask
+# And you'll be left with a boring rectangle. 
+twitter_mask = imread('donkey.png', flatten=True)
+
+
+# Stop words are words you can filter from your word cloud. 
+more_stopwords = {'oh', 'will', 'hey', 'yet', 'https', 'co', 'com'}
+STOPWORDS = STOPWORDS.union(more_stopwords)
+
+# Time to create and generate your word cloud. Feel free to adjust the background color to your taste.
+wc = WordCloud(background_color="black", max_words=2000, mask=mask,
+               stopwords=STOPWORDS)
+# generate word cloud
+wc.generate(f)
+
+
+# Store to file name of your choosing
+wc.to_file(path.join(d, "hc1.png"))
+
+# show
+plt.imshow(wc)
+plt.axis("off")
+plt.figure()
+plt.imshow(twitter_mask, cmap=plt.cm.gray)
+plt.axis("off")
+plt.show()
+
+# Credit for the Word Cloud package in Python goes to https://github.com/amueller/word_cloud
