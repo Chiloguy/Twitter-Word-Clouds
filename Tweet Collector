@@ -1,0 +1,65 @@
+# Use this code to generate tweets from a certain user to a text file.
+# Note that the API only allows you to collect up to 3,240 tweets.
+
+import tweepy
+
+# Twitter API credentials. Also called OAuth. You'll need to do a bit of setup to grab this information.
+# Try not to let people get access to these keys as they'll be able to control your Twitter with them if they know what they're doing.
+# More details can be found here: https://dev.twitter.com/oauth
+
+consumer_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+consumer_secret = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+access_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+access_secret = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+def get_tweets(screen_name):
+	
+	# Authorize twitter, initialize tweepy
+	auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+	auth.set_access_token(access_key, access_secret)
+	api = tweepy.API(auth)
+	
+	# Create a list to hold the tweets you're about to collect
+	alltweets = []	
+	
+	# Make initial request for most recent tweets (200 is the maximum allowed count)
+	new_tweets = api.user_timeline(screen_name = screen_name,count=200)
+	
+	# Save the tweets to the list
+	alltweets.extend(new_tweets)
+	
+	# Save the id of the oldest tweet less one
+	oldest = alltweets[-1].id - 1
+	
+	# Keep grabbing tweets until there are no tweets left to grab (or until you reach 3,240)
+	while len(new_tweets) > 0:
+		print("getting tweets before %s" % (oldest))
+		
+		# All subsiquent requests use the max_id param to prevent duplicates
+		new_tweets = api.user_timeline(screen_name = screen_name,count=200,max_id=oldest)
+		
+		# Save most recent tweets
+		alltweets.extend(new_tweets)
+		
+		# Update the id of the oldest tweet less one
+		oldest = alltweets[-1].id - 1
+		
+		print("...%s tweets downloaded so far" % (len(alltweets)))
+	
+	# Transform the tweepy tweets into a 2D array that will populate the csv	
+	outtweets = [[tweet.id_str, tweet.created_at, tweet.text.encode("utf-8")] for tweet in alltweets]
+	
+	# Write the csv	
+	with open('%s_tweets.csv' % screen_name, 'w') as f:
+		writer = csv.writer(f)
+		writer.writerow(["id","created_at","text"])
+		writer.writerows(outtweets)
+	
+	pass
+
+
+if __name__ == '__main__':
+	# Pass in the username of the account whose tweets you want to download
+	get_tweets("realDonaldTrump")
+	
+	# Original code source was posted somewhere on Github. I'll try to find a link to it but it's sorta buried.
